@@ -60,70 +60,92 @@ public class ClubesportiuApplication implements CommandLineRunner {
 			log.info("No es troba a la base de dades");
 		}
 
-		try {
-			log.info("Selecciona una nadadora inexistent");
-			Nadador n3 = jdbcTemplate.queryForObject(
-					"SELECT * FROM Nadador WHERE nom =?",
-					new NadadorRowMapper(),
-					"Gemma Mengual");
-			log.info(n3.toString());
-		}
-		catch(EmptyResultDataAccessException e) {
-			log.info("El nadador ? no existe");
-		}
-
-		log.info("Inserta una nova nadadora");
-		jdbcTemplate.update(
-				"INSERT INTO Nadador VALUES(?, ?, ?, ?, ?)",
-				"Ariadna Edo", "XX1242", "Espanya", null, "Femení");
-		log.info("I comprova que s'haja inserit correctament");
-
-		mostraNadador("Gemma Mengual");
 
 
 
 		//########################INSERCIÓ#######################################
-		log.info("Inserta una nova nadadora");
+		/*log.info("Inserta una nova nadadora");
 		jdbcTemplate.update(
 				"INSERT INTO Nadador VALUES(?, ?, ?, ?, ?)",
-				"Ariadna Edo", "XX1242", "Espanya", null, "Femení");
+				"Ariadna es", "XX1243", "Espanya", null, "Femení");
 		log.info("I comprova que s'haja inserit correctament");
-		mostraNadador("Ariadna Edo");
+
+		mostraNadador("Ariadna es");
 
 
 		//#######################MODIFICACIÓ#######################################
 
 		log.info("Actualitza l'edat de la nadadora Ariadna Edo a 21 anys");
-		jdbcTemplate.update("UPDATE Nadador SET edat = 21 WHERE nom= Ariadna Edo ");
+		jdbcTemplate.update("UPDATE Nadador SET edat = 21 WHERE nom= 'Ariadna Edo' ");
 		log.info("I comprova que s'haja modificat correctament");
+
 		mostraNadador("Ariadna Edo");
+
+
 
 		//########################BORRAT###########################################
-		log.info("Esborra la nadadora Ariadna Edo");
-		jdbcTemplate.update("DELETE FROM Nadador WHERE Nom_nadador= Ariadna Edo");
+		*/log.info("Esborra la nadadora Ariadna Edo");
+		jdbcTemplate.update("DELETE FROM Nadador WHERE nom= 'Ariadna Edo'");
 		log.info("I comprova que s'haja esborrat correctament");
 		mostraNadador("Ariadna Edo");
-
 
 	}
 
 	public void mostraNadador(String nomNadador){
 
 		try {
-			log.info("datos de un nadador");
+			log.info("mostrar nadador");
 			Nadador mostraNadador = jdbcTemplate.queryForObject(
-					"SSELECT * FROM Nadador WHERE nom =?",
+					"SELECT * FROM Nadador WHERE nom =?",
 					new NadadorRowMapper(),
 					nomNadador);
 			log.info(mostraNadador.toString());
 		}
 		catch(EmptyResultDataAccessException e) {
-			log.info("El nadador"+  nomNadador +" no es troba a la base de dades");
+			log.info("El nadador "+  nomNadador +" no es troba a la base de dades");
 		}
-
+		provaNadadorDao();
 
 
 	}
+	// Demana a Spring que ens proporcione una instància de NadadorDAO
+	// mitjanjant injecció de dependencies
+	@Autowired
+	NadadorDao nadadorDao;
+
+	void provaNadadorDao() {
+		log.info("Provant NadadorDao");
+		log.info("Tots els nadadors");
+
+		for (Nadador n: nadadorDao.getNadadors()) {
+			log.info(n.toString());
+		}
+
+		log.info("Dades de Gemma Mengual");
+		Nadador n = nadadorDao.getNadador("Gemma Mengual");
+		log.info(n.toString());
+
+
+		Nadador aEdo = new Nadador();
+		aEdo.setNom("Ariadna Edo");
+		aEdo.setEdat(21);
+		log.info("Nou: Ariadna Edo");
+		nadadorDao.addNadador(aEdo);
+		log.info(nadadorDao.getNadador("Ariadna Edo").toString());
+
+		log.info("Actualitzat: Ariadna Edo");
+		aEdo.setPais("Espanya");
+		aEdo.setGenere("Femení");
+		nadadorDao.updateNadador(aEdo);
+		log.info(nadadorDao.getNadador("Ariadna Edo").toString());
+
+		log.info("Esborrat: Ariadna Edo");
+		nadadorDao.deleteNadador(aEdo);
+		if (nadadorDao.getNadador("Ariadna Edo") == null) {
+			log.info("Esborrada correctament");
+		}
+	}
+
 
 
 	@Bean

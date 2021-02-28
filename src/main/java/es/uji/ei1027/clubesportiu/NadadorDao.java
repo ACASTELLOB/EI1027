@@ -23,26 +23,34 @@ public class NadadorDao {
 
     /* Afegeix el nadador a la base de dades */
     public void addNadador(Nadador nadador) {
-        jdbcTemplate.update("INSERT INTO Nadador VALUES(?, ?, ?, ?, ?)",
-                nadador.getNom(), nadador.getNumFederat(), nadador.getPais(), nadador.getClass(), nadador.getGenere());
-        log.info("I comprova que s'haja inserit correctament");
+        jdbcTemplate.update(
+                "INSERT INTO Nadador VALUES(?, ?, ?, ?, ?)",
+                    nadador.getNom(), nadador.getNumFederat(), nadador.getPais(), nadador.getEdat(), nadador.getGenere());
     }
 
     /* Esborra el nadador de la base de dades */
     public void deleteNadador(Nadador nadador) {
-        jdbcTemplate.update(...);
+        jdbcTemplate.update( "DELETE FROM Nadador WHERE nom= ? ",
+                nadador.getNom());
     }
 
     /* Actualitza els atributs del nadador
        (excepte el nom, que és la clau primària) */
     public void updateNadador(Nadador nadador) {
-        jdbcTemplate.update(...);
+        jdbcTemplate.update("UPDATE Nadador SET edat =?, genere =?, num_federat =?, pais=? WHERE nom=? ",
+                 nadador.getEdat(),nadador.getGenere(),nadador.getNumFederat(),nadador.getPais() ,nadador.getNom());
+
+
+
+
     }
 
     /* Obté el nadador amb el nom donat. Torna null si no existeix. */
     public Nadador getNadador(String nomNadador) {
         try {
-            return jdbcTemplate.queryForObject(...);
+            return jdbcTemplate.queryForObject( "SELECT * FROM Nadador WHERE nom =?",
+                    new NadadorRowMapper(),
+                    nomNadador);
         }
         catch(EmptyResultDataAccessException e) {
             return null;
@@ -52,7 +60,8 @@ public class NadadorDao {
     /* Obté tots els nadadors. Torna una llista buida si no n'hi ha cap. */
     public List<Nadador> getNadadors() {
         try {
-            return jdbcTemplate.query(...)
+            return jdbcTemplate.query("SELECT * FROM Nadador",
+                    new NadadorRowMapper());
         }
         catch(EmptyResultDataAccessException e) {
             return new ArrayList<Nadador>();
